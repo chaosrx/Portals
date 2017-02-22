@@ -44,6 +44,8 @@ namespace SKSStudios.Portals.VR {
         public bool is3d;
         [HideInInspector]
         public PhysicsPassthrough physicsPassthrough;
+        [HideInInspector]
+        public GameObject placeholder;
 
         private Camera headCamera;
 
@@ -109,7 +111,7 @@ namespace SKSStudios.Portals.VR {
             headCollider = headCamera.GetComponent<Collider>();
             _nearClipVertsLocal = EyeNearPlaneDimensions(headCamera);
             _nearClipVertsGlobal = new Vector3[_nearClipVertsLocal.Length];
-            portalCamera.headCamera = headCamera;
+            //portalCamera.headCamera = headCamera;
             portalCamera.Initialize(VR);
         }
 
@@ -182,10 +184,16 @@ namespace SKSStudios.Portals.VR {
                             deepestVert = dotProduct;
                     }
                 }
-                if (_CheeseActivated && !is3d)
+                if (_CheeseActivated && !is3d) {
                     transform.localScale = new Vector3(1f, 1f, ((-deepestVert + fudgeFactor) / portalRoot.localScale.x));
-                else if (!_CheeseActivated)
+                    placeholder.SetActive(false);
+                } else if (!_CheeseActivated) 
+                {
+                    placeholder.SetActive(true);
                     _portalMaterial.renderQueue = (int)RenderQueue.Transparent;
+                }
+                   
+               
             }
 
         }
@@ -199,11 +207,11 @@ namespace SKSStudios.Portals.VR {
                 //Is the camera looking at the portal the head camera?
                 UpdateDopplegangers();
                 targetPortal.UpdateDopplegangers();
-                if (Camera.current == headCamera) {
+                //if (Camera.current == headCamera) {
                     //Update the doppleganger positions
 
-                    TryRenderPortal(headCamera, _nearClipVertsGlobal);
-                }
+                    TryRenderPortal(Camera.current, _nearClipVertsGlobal);
+                //}
             }
         }
         /// <summary>
@@ -257,7 +265,7 @@ namespace SKSStudios.Portals.VR {
                 return;
 
             if ((isVisible || _CheeseActivated)) {
-                portalCamera.RenderIntoMaterial(_portalMaterial, gameObject.GetComponent<MeshRenderer>(), _targetRenderer, _meshFilter.mesh, !nonObliqueOverride ? !_CheeseActivated : false, optimize, is3d);
+                portalCamera.RenderIntoMaterial(camera, _portalMaterial, gameObject.GetComponent<MeshRenderer>(), _targetRenderer, _meshFilter.mesh, !nonObliqueOverride ? !_CheeseActivated : false, optimize, is3d);
                 _rendered = true;
             }
         }
@@ -388,10 +396,16 @@ namespace SKSStudios.Portals.VR {
                     if (hit.Length > 0) {
                         foreach (RaycastHit h in hit) {
                             //Never ignore collisions with teleportables
+                            //Never ignore collisions with teleportables
                             if (h.collider.gameObject.tag != "PhysicsPassthroughDuplicate" &&
-                                h.collider.gameObject.GetComponent<Teleportable>() == null &&
-                                h.collider.transform.parent.parent != transform.parent.parent) {
-                                teleportScript.IgnoreCollision(h.collider);
+                                h.collider.gameObject.GetComponent<Teleportable>() == null) {
+                                if (h.collider.transform.parent && transform.parent && h.collider.transform.parent.parent && transform.parent.parent) {
+                                    if (h.collider.transform.parent.parent != transform.parent.parent)
+                                        teleportScript.IgnoreCollision(h.collider);
+                                } else {
+                                    teleportScript.IgnoreCollision(h.collider);
+                                }
+
                             }
                         }
                     }

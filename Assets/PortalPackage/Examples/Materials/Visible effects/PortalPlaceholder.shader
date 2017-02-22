@@ -19,7 +19,7 @@
 		#include "UnityCG.cginc"
 
 		float random(in float2 _st) {
-			return frac(sin(dot(_st.xy, float2(12.9898,78.233))) * 43758.54531237);
+			return frac(sin(dot(_st.xy, float2(12.9898,78.233))) * 43758.54531237); 
 		}
 
 		// Based on Morgan McGuire @morgan3d

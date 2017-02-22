@@ -7,7 +7,7 @@
 		_Alpha("AlphaValue", Float) = 1
 		_ZTest("ZTest Enabled", Float) = 0
 		_Mask("Mask enabled", Float) = 1
-		_Inverted("Inverted", Float) = 0
+		//_Inverted("Inverted", Float) = 0
 	}
 
 		SubShader{
@@ -16,7 +16,8 @@
 		LOD 100
 		Blend SrcAlpha OneMinusSrcAlpha
 		ZTest[_ZTest]
-
+		Cull back
+		ZWrite Off
 		Pass{
 		Name "MainShader"
 		CGPROGRAM
@@ -24,7 +25,6 @@
 		#pragma fragment frag
 		#pragma target 3.0
 		#pragma multi_compile __ STEREO_RENDER
-
 
 		#include "UnityCG.cginc"
 
@@ -45,7 +45,7 @@
 
 	float _Alpha;
 	float _Mask;
-	float _Inverted;
+	//float _Inverted;
 
 	v2f vert(appdata v, out float4 outpos : SV_POSITION)
 	{
@@ -63,10 +63,9 @@
 		
 		//Inversion for certain rendering engines
 		//#if !UNITY_UV_STARTS_AT_TOP
-		if (_Inverted) {
-			sUV.y = 1 - sUV.y;
-		}
-			
+		//if (_Inverted) {
+		//	sUV.y = 1 - sUV.y;
+		//}
 		//#endif
 		
 		//clip(alpha.a);

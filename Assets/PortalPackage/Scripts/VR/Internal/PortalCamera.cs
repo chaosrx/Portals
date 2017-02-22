@@ -17,7 +17,7 @@ namespace SKSStudios.Portals.VR {
         public Transform PortalCameraParent;
         public Transform portalTransform;
         public Transform portalDestination;
-        public Camera headCamera;
+        //public Camera headCamera;
         public bool distanceScaling = true;
         public Camera cameraForPortal;
         public Mesh blitMesh;
@@ -77,7 +77,7 @@ namespace SKSStudios.Portals.VR {
 
             cameraForPortal.enabled = false;
             cameraLib = gameObject.AddComponent<PortalCameraLib>();
-            cameraLib.Initialize(headCamera, cameraForPortal, portalTransform, portalDestination, baseResolution, _blitMat, VR);
+            cameraLib.Initialize(portalTransform, portalDestination, baseResolution, _blitMat, VR);
         }
 
         /// <summary>
@@ -116,26 +116,29 @@ namespace SKSStudios.Portals.VR {
         /// <param name="viewBounds">The bounds of the renderer on the screen</param>
         /// <param name="obliquePlane">Should the camera render with an oblique near clipping plane?</param>
         //public RenderTexture tempTex ;
-        public void RenderIntoMaterial(Material material, MeshRenderer sourceRenderer, MeshRenderer targetRenderer, Mesh mesh, bool obliquePlane = true, bool optimize = true, bool is3d = false) {
+        public void RenderIntoMaterial(Camera camera, Material material, MeshRenderer sourceRenderer, MeshRenderer targetRenderer, Mesh mesh, bool obliquePlane = true, bool optimize = true, bool is3d = false) {
             //Renders the portal itself to the rendertexture
             transform.parent = PortalCameraParent;
-            PortalCameraParent.rotation = portalDestination.rotation * (Quaternion.Inverse(portalTransform.rotation) * (headCamera.transform.rotation));
+            PortalCameraParent.rotation = portalDestination.rotation * (Quaternion.Inverse(portalTransform.rotation) * (camera.transform.rotation));
             if (VR) {
-                //Left eye
-                //Older version
-                //Matrix4x4 viewMatrix = HMDMatrix4x4ToMatrix4x4(SteamVR.instance.hmd.GetProjectionMatrix(Valve.VR.EVREye.Eye_Left, headCamera.nearClipPlane,
-                //headCamera.farClipPlane, Valve.VR.EGraphicsAPIConvention.API_DirectX));
-                Matrix4x4 viewMatrix = HMDMatrix4x4ToMatrix4x4(SteamVR.instance.hmd.GetProjectionMatrix(Valve.VR.EVREye.Eye_Left, headCamera.nearClipPlane,
-                    headCamera.farClipPlane));
+                //if (camera.stereoTargetEye == StereoTargetEyeMask.Both || camera.stereoTargetEye == StereoTargetEyeMask.Left) {
+                    //left eye
+                //    cameraForPortal.stereoTargetEye = StereoTargetEyeMask.Left;
+                    Matrix4x4 viewMatrix = HMDMatrix4x4ToMatrix4x4(SteamVR.instance.hmd.GetProjectionMatrix(Valve.VR.EVREye.Eye_Left, camera.nearClipPlane,
+                    camera.farClipPlane));
+                    cameraLib.RenderCamera(cameraForPortal, camera, SteamVR.instance.eyes[0].pos, viewMatrix, "_LeftEyeTexture", obliquePlane, optimize, material, leftEyeRenderTexture, sourceRenderer, targetRenderer, mesh, is3d, false);
+               // }
 
-                cameraLib.RenderCamera(SteamVR.instance.eyes[0].pos, "_LeftEyeTexture", obliquePlane, optimize, material, viewMatrix, leftEyeRenderTexture, sourceRenderer, targetRenderer, mesh, is3d);
-                //Right eye
-                viewMatrix = HMDMatrix4x4ToMatrix4x4(SteamVR.instance.hmd.GetProjectionMatrix(Valve.VR.EVREye.Eye_Right, headCamera.nearClipPlane,
-                    headCamera.farClipPlane));
-                cameraLib.RenderCamera(SteamVR.instance.eyes[1].pos, "_RightEyeTexture", obliquePlane, optimize, material, viewMatrix, rightEyeRenderTexture, sourceRenderer, targetRenderer, mesh, is3d);
+               // if (camera.stereoTargetEye == StereoTargetEyeMask.Both || camera.stereoTargetEye == StereoTargetEyeMask.Left) {
+                    //Right eye
+               //     cameraForPortal.stereoTargetEye = StereoTargetEyeMask.Right;
+                    viewMatrix = HMDMatrix4x4ToMatrix4x4(SteamVR.instance.hmd.GetProjectionMatrix(Valve.VR.EVREye.Eye_Right, camera.nearClipPlane,
+                    camera.farClipPlane));
+                    cameraLib.RenderCamera(cameraForPortal, camera, SteamVR.instance.eyes[1].pos, viewMatrix, "_RightEyeTexture", obliquePlane, optimize, material, rightEyeRenderTexture, sourceRenderer, targetRenderer, mesh, is3d, true);
+               //}
             } else {
                 //Screen projection
-                cameraLib.RenderCamera(headCamera.transform.position, "_RightEyeTexture", obliquePlane, optimize, material, headCamera.projectionMatrix, rightEyeRenderTexture, sourceRenderer, targetRenderer, mesh, is3d);
+                cameraLib.RenderCamera(cameraForPortal, camera, camera.transform.position, camera.projectionMatrix, "_RightEyeTexture", obliquePlane, optimize, material, rightEyeRenderTexture, sourceRenderer, targetRenderer, mesh, is3d, false);
             }
         }
     }

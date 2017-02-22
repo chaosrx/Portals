@@ -81,7 +81,9 @@ namespace SKSStudios.Portals.VR {
             portalCameraScript.PortalCameraParent = portalCameraScript.gameObject.transform.parent.gameObject.transform;
             portalCameraScript.portalTransform = transform.FindChild("Portal/PortalSource").transform;
             portalCameraScript.portalDestination = targetInitializer.transform.FindChild("Portal/PortalTarget");
-            //portalCameraScript.Initialize(VR_Enabled);
+
+
+            portalPlaceholder = transform.FindChild("Portal/PortalRenderer/PortalPlaceholder").gameObject;
 
             portalScript.origin = transform.FindChild("Portal/PortalSource");
             portalScript.destination = targetInitializer.transform.FindChild("Portal/PortalTarget");
@@ -96,12 +98,13 @@ namespace SKSStudios.Portals.VR {
             portalScript.portalCamera = portalCameraScript;
             portalScript.physicsPassthrough = transform.FindChild("Portal/PortalRenderer/PortalPhysicsPassthrough").GetComponent<PhysicsPassthrough>();
             portalScript.enterable = enterable;
+            portalScript.placeholder = portalPlaceholder;
 
             portalTrigger.portal = portalScript.gameObject;
 
             //Readies the portal for scaling and transformations
             portalRenderer = transform.FindChild("Portal/PortalRenderer/").gameObject;
-            portalPlaceholder = transform.FindChild("Portal/PortalRenderer/PortalPlaceholder").gameObject;
+            
             portalPlaceholder.GetComponent<Renderer>().material.SetTexture("_AlphaTexture", mask);
             portalOrigin = transform.FindChild("Portal/PortalSource");
             portalDestination = transform.FindChild("Portal/PortalTarget");

@@ -1,0 +1,7 @@
+1
+1.0
+1
+
+//First line: has the project been fully imported?
+//Second line: Current version
+//Third line: Are updates being shown or ignored?
